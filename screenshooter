@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# The original simple screenshooter. Will be combined with GIFcap.
+
+### Settings.
+
+# Hostname.
+HOST="examplehost.com"
+# Username.
+USER="contraculto"
+#FTP Password.
+#PASSWD="" REQUIRED FOR FTP. USE KEYS FOR SSH.
+# Final directory for images in the server.
+FOLDER="/var/www/examplehost.com/www/shots"
+# Public URI for images in server.
+url="http://examplehost.com/shots/";
+# Local directory for temporary images.
+LOCALFOLDER="$HOME/screenshots/"
+# Keep local copy of images? "yes" to keep them, anything else to delete them.
+KEEPLOCAL="yes";
+
+### All good. Nothing more to set.
+
+fecha=`date '+%Y%m%d'`;
+randstring="`< /dev/urandom tr -dc A-Za-z0-9 | head -c4`.png"
+nombre=$fecha"_"$randstring;
+file="$LOCALFOLDER$nombre";
+sleep 1; scrot -s -b -q 0 $file;
+
+IMG=$file;
+
+scp $IMG $USER"@"$HOST":"$FOLDER"/"$nombre
+#ftp -n $HOST <<EOF
+#quote USER $USER
+#quote PASS $PASSWD
+#cd $FOLDER
+#put $IMG $nombre
+#EOF
+
+link=$url$nombre;
+
+echo $link|xclip -selection clipboard;
+
+echo 'Message:Screenshot uploaded' | zenity --notification --listen --window-icon="/home/rod/Documents/pics/camera-icon.jpg";
+
+if [ "$KEEPLOCAL" != "yes" ];
+then
+rm $IMG
+fi
+
+exit

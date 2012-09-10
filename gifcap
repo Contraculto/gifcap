@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# GIFcap.
+# Great Intelligence Forever.
+# Contraculto.
+# rodrigo@contraculto.com
+
+# No simple screenshot functionality for now. Will be combined with the Screenshooter.
+
+### Settings.
+
+# Hostname.
+HOST="examplehost.com"
+# Username.
+USER="contraculto"
+#FTP Password.
+#PASSWD="" REQUIRED FOR FTP. USE KEYS FOR SSH.
+# Final directory for images in the server.
+FOLDER="/var/www/examplehost.com/www/shots"
+# Public URI for images in server.
+url="http://examplehost.com/shots/";
+# Local directory for temporary images.
+LOCALFOLDER="$HOME/screenshots/"
+# Keep local copy of images? "yes" to keep them, anything else to delete them.
+KEEPLOCAL="yes";
+
+### All good. Nothing more to set.
+
+# Just 4 images and fixed speed for now. This will be improved soon.
+
+fecha=`date '+%Y%m%d'`
+randstring="`< /dev/urandom tr -dc A-Za-z0-9 | head -c4`"
+name=$fecha"_"$randstring
+file=$LOCALFOLDER$name
+file1=$LOCALFOLDER$name"1.png"
+file2=$LOCALFOLDER$name"2.png"
+file3=$LOCALFOLDER$name"3.png"
+file4=$LOCALFOLDER$name"4.png"
+filex=$LOCALFOLDER$name".gif"
+finalname=$name".gif"
+
+sleep 1; scrot -s -b -q 0 $file1
+sleep 1; scrot -s -b -q 0 $file2
+sleep 1; scrot -s -b -q 0 $file3
+sleep 1; scrot -s -b -q 0 $file4
+
+mogrify -resize 640x480 $file1
+mogrify -resize 640x480 $file2
+mogrify -resize 640x480 $file3
+mogrify -resize 640x480 $file4
+
+convert -delay 40 -loop 0 $file*.png $filex
+
+scp $filex $USER"@"$HOST":"$FOLDER"/"$finalname
+#ftp -n $HOST <<EOF
+#quote USER $USER
+#quote PASS $PASSWD
+#cd $FOLDER
+#put $IMG $name
+#EOF
+
+#link=`curl -# -s http://voxd.dv.cl/shrt/acortar.php?url=$url$finalname`;
+link=$url$finalname
+
+echo $link|xclip -selection clipboard
+
+echo 'Message:Great Intelligence Forever' | zenity --notification --listen --window-icon="/home/rod/Documents/pics/camera-icon.jpg" #CAMBIAR
+
+if [ "$KEEPLOCAL" != "si" ]
+then
+rm $filex
+fi
+
+exit
